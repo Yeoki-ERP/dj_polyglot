@@ -26,10 +26,7 @@ class Command(BaseCommand):
 
         # Define the path to your locale directory
         source_project = kwargs.get("source_project")
-        if source_project == "ycommon":
-            locale_path = os.path.join(settings.BASE_DIR, "ycommon", "locale")
-        else:
-            locale_path = os.path.join(settings.BASE_DIR, "locale")
+        locale_path = os.path.join(settings.BASE_DIR, "locale")
 
         # Iterate over all .po files in the locale directory
         for root, dirs, files in os.walk(locale_path):
