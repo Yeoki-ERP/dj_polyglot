@@ -18,6 +18,12 @@ jobs:
       with:
         python-version: 3.11
 
+    - name: Increment version
+      run: |
+        pip install bump2version
+        bump2version patch
+        git push origin main --follow-tags  # Push updated version and tags
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
