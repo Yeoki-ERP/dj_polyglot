@@ -48,7 +48,7 @@ jobs:
       if: ${{ !startsWith(github.ref, 'refs/tags/')}}
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.versioning.outputs.version }}
         release_name: ${{ steps.versioning.outputs.version }}
@@ -73,7 +73,7 @@ jobs:
     - run: git commit -m "Semantic Release"
       if: ${{ !startsWith(github.ref, 'refs/tags/')}}
 
-    - run: "git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/Yeoki-ERP/dj_polyglot.git HEAD"
+    - run: "git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Yeoki-ERP/dj_polyglot.git HEAD"
       if: ${{ !startsWith(github.ref, 'refs/tags/')}}
 
     - name: Install dependencies
