@@ -18,11 +18,63 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Increment version
-      run: |
-        pip install bump2version
-        bump2version patch
-        git push origin main --follow-tags  # Push updated version and tags
+    - name: Semantic versioning
+      id: versioning
+      uses: paulhatch/semantic-version@v4.0.2
+      if: github.ref == 'refs/heads/master'
+      with:
+        branch: main
+        # The prefix to use to identify tag s
+        tag_prefix: "v"
+        # A string which, if present in a git commit, indicates that a change represents a
+        # major (breaking) change, supports regular expressions wrapped with '/'
+        major_pattern: "(MAJOR)"
+        # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
+        minor_pattern: "(MINOR)"
+        # A string to determine the format of the version output
+        format: "${major}.${minor}.${increment}"
+        # Optional path to check for changes. If any changes are detected in the path the
+        # 'changed' output will true. Enter multiple paths separated by spaces.
+        #change_path: "src/my-service"
+        # Named version, will be used as suffix for name version tag
+        #namespace: my-service
+        # Indicate whether short tags like 'v1' should be supported. If false only full
+        # tags like 'v1.0.0' will be recognized.
+        short_tags: true
+        # If this is set to true, *every* commit will be treated as a new version.
+        bump_each_commit: false
+
+    - name: Create Release
+      if: ${{ !startsWith(github.ref, 'refs/tags/')}}
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN:  ${{ secrets.GH_TOKEN }}
+      with:
+        tag_name: ${{ steps.versioning.outputs.version }}
+        release_name: ${{ steps.versioning.outputs.version }}
+        prerelease: false
+
+    - name: Find and Replace
+      uses: jacobtomlinson/gha-find-replace@v3
+      with:
+        find: "version = ([0-9]+)\\.([0-9]+)\\.([0-9]+)"
+        replace: "version = ${{ steps.versioning.outputs.version }}"
+        include: "setup.cfg"
+
+    - run: git config --local user.email "action@github.com"
+      if: ${{ !startsWith(github.ref, 'refs/tags/')}}
+
+    - run: git config --local user.name "GitHub Action"
+      if: ${{ !startsWith(github.ref, 'refs/tags/')}}
+
+    - run: git add setup.cfg
+      if: ${{ !startsWith(github.ref, 'refs/tags/')}}
+
+    - run: git commit -m "Semantic Release"
+      if: ${{ !startsWith(github.ref, 'refs/tags/')}}
+
+    - run: "git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/Yeoki-ERP/dj_polyglot.git HEAD"
+      if: ${{ !startsWith(github.ref, 'refs/tags/')}}
 
     - name: Install dependencies
       run: |
