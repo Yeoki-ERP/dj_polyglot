@@ -89,3 +89,6 @@ jobs:
         TWINE_USERNAME: "__token__"
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: python -m twine upload dist/*
+
+permissions:
+  contents: write
