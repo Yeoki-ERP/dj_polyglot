@@ -55,8 +55,8 @@ jobs:
     - name: Find and Replace
       uses: jacobtomlinson/gha-find-replace@v3
       with:
-        find: "    version=([0-9]+)\\.([0-9]+)\\.([0-9]+)"
-        replace: "    version=${{ steps.versioning.outputs.version }}"
+        find: "    version=([0-9]+)\\.([0-9]+)\\.([0-9]+),"
+        replace: "    version=${{ steps.versioning.outputs.version }},"
         include: "setup.py"
 
     - run: git config --local user.email "action@github.com"

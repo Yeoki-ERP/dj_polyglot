@@ -8,16 +8,10 @@ from django.core.management.base import BaseCommand
 
 logger = logging.getLogger("django")
 
-API_TOKEN = ""
-
 class Command(BaseCommand):
     """Extracts all translatable strings and makes an API request with them."""
 
     help = "Extracts all translatable strings and makes an API request with them."
-
-    def add_arguments(self, parser):
-        """Add arguments to the command."""
-        parser.add_argument("source_project", type=str, help="Source project name")
 
     def handle(self, *args, **kwargs):
         """Extracts all translatable strings and makes an API request with them."""
@@ -25,12 +19,12 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Pulling translations..."))
         start_time = time.time()
-        source_project = kwargs.get("source_project")
-        # API request
+        source_project = settings.DJ_POLYGLOT_PROJECT
+
         response = requests.post(
             "https://dj-polyglot.com/api/pull-translations/",
             data={"source_project": source_project},
-            headers={"Authorization": API_TOKEN},
+            headers={"Authorization": f"Token {settings.DJ_POLYGLOT_KEY}"},
         )
 
         if response.status_code != 200:

@@ -7,16 +7,11 @@ from django.core.management.base import BaseCommand
 
 logger = logging.getLogger("django")
 
-API_TOKEN = ""
 
 class Command(BaseCommand):
     """Command to extract all translatable strings and send them to an API endpoint."""
 
     help = "Extracts all translatable strings and makes an API request with them."
-
-    def add_arguments(self, parser):
-        """Add arguments to the command."""
-        parser.add_argument("source_project", type=str, help="Source project name")
 
     def handle(self, *args, **kwargs):
         """Handle the command."""
@@ -24,8 +19,6 @@ class Command(BaseCommand):
 
         translatable_strings = []
 
-        # Define the path to your locale directory
-        source_project = kwargs.get("source_project")
         locale_path = os.path.join(settings.BASE_DIR, "locale")
 
         # Iterate over all .po files in the locale directory
@@ -44,13 +37,13 @@ class Command(BaseCommand):
 
         logger.info(f"Found {len(translatable_strings)} translatable strings.")
         logger.info("Pusing translatable strings to the API...")
-        data = {"translations": translatable_strings, "source_project": source_project}
+        data = {"translations": translatable_strings, "source_project": settings.DJ_POLYGLOT_PROJECT}
         service_url = "https://dj-polyglot.com"
 
         response = requests.post(
             f"{service_url}/api/push-translations/",
             json=data,
-            headers={"Authorization": API_TOKEN},
+            headers={"Authorization": f"Token {settings.DJ_POLYGLOT_KEY}"},
         )
 
         # Check the response status
