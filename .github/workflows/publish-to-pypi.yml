@@ -24,7 +24,6 @@ jobs:
       if: github.ref == 'refs/heads/main'
       with:
         branch: main
-        version-file: setup.py
         # The prefix to use to identify tag s
         tag_prefix: "v"
         # A string which, if present in a git commit, indicates that a change represents a
