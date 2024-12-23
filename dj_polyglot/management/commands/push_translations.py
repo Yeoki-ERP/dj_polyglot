@@ -5,7 +5,7 @@ import requests
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-logger = logging.getLogger("django")
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -16,6 +16,12 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         """Handle the command."""
         import polib
+        # Ensure that DJ_POLYGLOT_PROJECT and DJ_POLYGLOT_KEY are available
+        if not getattr(settings, "DJ_POLYGLOT_PROJECT", None):
+            raise ValueError("DJ_POLYGLOT_PROJECT is not set in the settings.")
+        
+        if not getattr(settings, "DJ_POLYGLOT_KEY", None):
+            raise ValueError("DJ_POLYGLOT_KEY is not set in the settings.")
 
         translatable_strings = []
 
@@ -37,7 +43,9 @@ class Command(BaseCommand):
 
         logger.info(f"Found {len(translatable_strings)} translatable strings.")
         logger.info("Pusing translatable strings to the API...")
+
         data = {"translations": translatable_strings, "source_project": settings.DJ_POLYGLOT_PROJECT}
+
         service_url = "https://dj-polyglot.com"
 
         response = requests.post(
@@ -46,10 +54,9 @@ class Command(BaseCommand):
             headers={"Authorization": f"Token {settings.DJ_POLYGLOT_KEY}"},
         )
 
-        # Check the response status
+
         if response.status_code == 200:
-            self.stdout.write(self.style.SUCCESS("Successfully pushed translatable strings."))
+            logger.info("Successfully pushed translatable strings.")
         else:
-            self.stdout.write(
-                self.style.ERROR(f"Failed to pushed translatable strings. Status code: {response.status_code}")
-            )
+            logger.error(f"Failed to push translatable strings. Status code: {response.status_code}")
+        return response

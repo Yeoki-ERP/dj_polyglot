@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dj-polyglot",
-    version="0.7.0",
+    version="0.8.0",
     packages=find_packages(),
     include_package_data=True,
     url="https://github.com/Yeoki-ERP/dj_polyglot",
