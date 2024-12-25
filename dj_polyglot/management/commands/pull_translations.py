@@ -21,17 +21,30 @@ class Command(BaseCommand):
         start_time = time.time()
         source_project = settings.DJ_POLYGLOT_PROJECT
 
-        response = requests.post(
-            "https://dj-polyglot.com/api/pull-translations/",
-            data={"source_project": source_project},
-            headers={"Authorization": f"Token {settings.DJ_POLYGLOT_KEY}"},
-        )
+        if not getattr(settings, "DJ_POLYGLOT_PROJECT", None):
+            raise ValueError("DJ_POLYGLOT_PROJECT is not set in the settings.")
 
-        if response.status_code != 200:
-            logger.info(f"Failed to receive translatable strings. Status code: {response.status_code}, {response.content}. Time: {time.time() - start_time:.2f} seconds.")
-            return
+        source_projects = [source_project]
 
-        translations = response.json().get("translations", [])
+        source_project_pull_extra = settings.DJ_POLYGLOT_PROJECT_PULL_EXTRA
+        
+        if source_project_pull_extra:
+            source_projects += source_project_pull_extra
+
+        translations = []
+
+        for source_project in source_projects:
+            response = requests.post(
+                "https://dj-polyglot.com/api/pull-translations/",
+                data={"source_project": source_project},
+                headers={"Authorization": f"Token {settings.DJ_POLYGLOT_KEY}"},
+            )
+
+            if response.status_code != 200:
+                logger.info(f"Failed to receive translatable strings. Status code: {response.status_code}, {response.content}. Time: {time.time() - start_time:.2f} seconds.")
+                return
+        
+            translations += response.json().get("translations", [])
 
         logger.info(f"Successfully received {len(translations)} translations from {source_project}")
 

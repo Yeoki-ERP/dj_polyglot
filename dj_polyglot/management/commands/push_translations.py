@@ -13,6 +13,17 @@ class Command(BaseCommand):
 
     help = "Extracts all translatable strings and makes an API request with them."
 
+    def add_arguments(self, parser):
+        """Add arguments to the command."""
+
+        parser.add_argument(
+            "no_obselete",
+            type=str,
+            nargs="?",
+            default=None,
+            help="Remove obselete translations from the API.",
+        )
+
     def handle(self, *args, **kwargs):
         """Handle the command."""
         import polib
@@ -44,7 +55,11 @@ class Command(BaseCommand):
         logger.info(f"Found {len(translatable_strings)} translatable strings.")
         logger.info("Pusing translatable strings to the API...")
 
-        data = {"translations": translatable_strings, "source_project": settings.DJ_POLYGLOT_PROJECT}
+        data = {
+            "translations": translatable_strings, 
+            "source_project": settings.DJ_POLYGLOT_PROJECT,
+            "no_obselete": kwargs["no_obselete"] if kwargs["no_obselete"] else False,
+        }
 
         service_url = "https://dj-polyglot.com"
 
@@ -59,4 +74,3 @@ class Command(BaseCommand):
             logger.info("Successfully pushed translatable strings.")
         else:
             logger.error(f"Failed to push translatable strings. Status code: {response.status_code}")
-        return response
