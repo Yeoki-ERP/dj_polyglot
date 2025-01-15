@@ -26,10 +26,8 @@ class Command(BaseCommand):
 
         source_projects = [source_project]
 
-        source_project_pull_extra = settings.DJ_POLYGLOT_PROJECT_PULL_EXTRA
-        
-        if source_project_pull_extra:
-            source_projects += source_project_pull_extra
+        if getattr(settings, "DJ_POLYGLOT_PROJECT_EXTRA", None):
+            source_projects += settings.DJ_POLYGLOT_PROJECT_EXTRA
 
         translations = []
 

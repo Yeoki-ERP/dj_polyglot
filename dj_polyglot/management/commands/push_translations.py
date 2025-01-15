@@ -24,6 +24,14 @@ class Command(BaseCommand):
             help="Remove obselete translations from the API.",
         )
 
+        parser.add_argument(
+            "auto_translate",
+            type=str,
+            nargs="?",
+            default=None,
+            help="Remove obselete translations from the API.",
+        )
+
     def handle(self, *args, **kwargs):
         """Handle the command."""
         import polib
@@ -52,13 +60,13 @@ class Command(BaseCommand):
                                 {"msgid": entry.msgid, "locale": os.path.basename(root), "context": entry.msgctxt}
                             )
 
-        logger.info(f"Found {len(translatable_strings)} translatable strings.")
-        logger.info("Pusing translatable strings to the API...")
+        logger.info(f"Pusing {len(translatable_strings)} translatable strings to the API...")
 
         data = {
             "translations": translatable_strings, 
             "source_project": settings.DJ_POLYGLOT_PROJECT,
             "no_obselete": kwargs["no_obselete"] if kwargs["no_obselete"] else False,
+            "auto_translate": kwargs["auto_translate"] if kwargs["auto_translate"] else False,
         }
 
         service_url = "https://dj-polyglot.com"
@@ -68,7 +76,6 @@ class Command(BaseCommand):
             json=data,
             headers={"Authorization": f"Token {settings.DJ_POLYGLOT_KEY}"},
         )
-
 
         if response.status_code == 200:
             logger.info("Successfully pushed translatable strings.")
